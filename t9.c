@@ -21,7 +21,7 @@ void start_interactive_session() {
 
 int main(int argc, char** argv) {
   Trie* trie = (Trie*)malloc(sizeof(Trie));
-  if (argc != 1) {
+  if (argc != 2) {
     fputs("Invalid number of arguments", stderr);
     return 1;
   }
