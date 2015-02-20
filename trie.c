@@ -56,6 +56,7 @@ void trie_read(Trie* trie_from_main, char* filename) {
       currentWord->tail = list_new(word);
     }
     current->totalWords++;
+    current = trie->root;
   }
 }
 
@@ -78,7 +79,7 @@ char* get_word(char* number) {
           return "There are no more T9nonyms.\n";
         }
       }
-      int index = determineIndex(number[i]);
+      int index = number[i] - '0' - 2; 
       if (current->next[index] == NULL) {
         return "Not found in current dictionary.\n";
       } else {
