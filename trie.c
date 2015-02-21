@@ -53,7 +53,7 @@ void trie_read(Trie* trie_from_main, char* filename) {
       }
       node = node->next[index];
     }
-    int size = strlen(buffer);
+    int size = strlen(buffer) + 1;
     char* word = (char*)calloc(size, sizeof(char));
     strncpy(word, buffer, size);
     if (node->word == NULL) {
@@ -69,6 +69,7 @@ void trie_read(Trie* trie_from_main, char* filename) {
     node = trie->root;
   }
   current = trie->root;
+  fclose(fp);
 }
 
 // takes a number as a character array
