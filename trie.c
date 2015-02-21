@@ -112,7 +112,7 @@ char* get_word(char* number) {
 // takes in the root node of a trie
 // frees up any allocated memory it used
 void trie_free(Node* root) {
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 9; i++) {
     if (root->next[i] != NULL) {
       trie_free(root->next[i]);
     }
