@@ -1,3 +1,10 @@
+/**
+ * Kevin Tsang
+ * CSE 374
+ * 2/20/2015
+ * A trie implementation which stores and retrieves
+ * words based on number input.
+ */
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -10,6 +17,8 @@ Trie* trie;
 Node* current;
 int wordsIndex;
 
+// determines what index is associated with a T9
+// letter input based on a character
 int determineIndex(char c) {
   switch(c) {
     case 'a': case 'b': case 'c': return 0;
@@ -24,42 +33,49 @@ int determineIndex(char c) {
   }
 }
 
+// takes a trie and a char* representing a filename
+// populates the trie using each line within the given
+// file name
 void trie_read(Trie* trie_from_main, char* filename) {
   FILE* fp = fopen(filename, "r");
   char buffer[MAX_LINE_LENGTH];
   trie = trie_from_main;
-  trie->root = (Node*)malloc(sizeof(Node));
-  current = trie->root;
+  trie->root = (Node*)calloc(1, sizeof(Node));
+  Node* node = trie->root;
   while (fgets(buffer, MAX_LINE_LENGTH, fp)) {
-    for (int i = 0; i < strnlen(buffer, MAX_LINE_LENGTH); i++) {
+    for (int i = 0; i < strlen(buffer); i++) {
       if (buffer[i] == '\n') {
         break;
       }
       int index = determineIndex(buffer[i]);
-      if (current->next[index] == NULL) {
-        Node* new = (Node*)malloc(sizeof(Node));
-	current->next[index] = new;
-	current->totalWords = 0;
+      if (node->next[index] == NULL) {
+        Node* new = (Node*)calloc(1, sizeof(Node));
+	node->next[index] = new;
+	node->totalWords = 0;
       }
-      current = current->next[index];
+      node = node->next[index];
     }
-    int size = strnlen(buffer, MAX_LINE_LENGTH);
-    char* word = (char*)malloc(sizeof(char)*size);
+    int size = strlen(buffer);
+    char* word = (char*)calloc(size, sizeof(char));
     strncpy(word, buffer, MAX_LINE_LENGTH);
-    List* currentWord = current->words;
+    List* currentWord = node->words;
     if (currentWord == NULL) {
-      current->words = list_new(word);
+      node->words = list_new(word);
     } else {
       while (currentWord->tail != NULL) {
         currentWord = currentWord->tail;
       }
       currentWord->tail = list_new(word);
     }
-    current->totalWords++;
-    current = trie->root;
+    node->totalWords++;
+    node = trie->root;
   }
+  current = trie->root;
 }
 
+// takes a number as a character array
+// traverses a trie and returns a number
+// associated with that key combination
 char* get_word(char* number) {
   if (number[0] == '#') {
     wordsIndex++;
@@ -71,25 +87,30 @@ char* get_word(char* number) {
   } else {
     current = trie->root;
     wordsIndex = 0;
-    int size = strnlen(number, MAX_LINE_LENGTH);
+    int size = strlen(number);
     for (int i = 0; i < size; i++) {
       if (number[i] == '#') {
         wordsIndex++;
-        if (wordsIndex > current->totalWords) {
-          return "There are no more T9nonyms.\n";
+      } else {
+        int index = number[i] - '0' - 2; 
+        if (current->next[index] == NULL) {
+          return "Not found in current dictionary.\n";
+        } else {
+          current = current->next[index];
         }
       }
-      int index = number[i] - '0' - 2; 
-      if (current->next[index] == NULL) {
-        return "Not found in current dictionary.\n";
-      } else {
-        current = current->next[index];
-      }
     }
-    return list_get(current->words, wordsIndex);
+    if (wordsIndex > current->totalWords) {
+      return "There are no more T9nonyms.\n";
+    } else {
+      List* currentWord = current->words;
+      return list_get(currentWord, wordsIndex);
+    }
   }
 }
 
+// takes in the root node of a trie
+// frees up any allocated memory it used
 void trie_free(Node* root) {
   for (int i = 0; i < 8; i++) {
     if (root->next[i] != NULL) {
