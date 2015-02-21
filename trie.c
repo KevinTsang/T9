@@ -84,12 +84,13 @@ char* get_word(char* number) {
     return current->word;
   } else {
     current = trie->root;
-    int size = strlen(number);
-    for (int i = 0; i < size - 1; i++) { 
+    int size = strlen(number) - 1;
+    for (int i = 0; i < size; i++) { 
     // the minus 1 is there to handle the extra newline that gets added in
       if (number[i] == '#') {
+
         current = current->next[8];
-        if (current == NULL && i < size - 1) {
+        if (current == NULL && i < size) {
           break; // handles if they have a # in the middle of their number
         }
       } else {
@@ -103,6 +104,8 @@ char* get_word(char* number) {
     }
     if (current == NULL) {
       return "There are no more T9nonyms.\n";
+    } else if (current->word == NULL) {
+      return "Not found in current dictionary.\n";
     } else {
       return current->word;
     }
