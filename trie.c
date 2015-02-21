@@ -10,12 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "list.h"
 #include "trie.h"
 
 Trie* trie;
 Node* current;
-int wordsIndex;
 
 // determines what index is associated with a T9
 // letter input based on a character
@@ -29,6 +27,7 @@ int determineIndex(char c) {
     case 'p': case 'q': case 'r': case 's': return 5;
     case 't': case 'u': case 'v': return 6;
     case 'w': case 'x': case 'y': case 'z': return 7;
+    case '#': return 8;
     default: return -1;
   }
 }
@@ -51,23 +50,22 @@ void trie_read(Trie* trie_from_main, char* filename) {
       if (node->next[index] == NULL) {
         Node* new = (Node*)calloc(1, sizeof(Node));
 	node->next[index] = new;
-	node->totalWords = 0;
       }
       node = node->next[index];
     }
     int size = strlen(buffer);
     char* word = (char*)calloc(size, sizeof(char));
     strncpy(word, buffer, size);
-    List* currentWord = node->words;
-    if (currentWord == NULL) {
-      node->words = list_new(word);
+    if (node->word == NULL) {
+      node->word = word;
     } else {
-      while (currentWord->tail != NULL) {
-        currentWord = currentWord->tail;
+      while (node->next[8] != NULL) {
+        node = node->next[8];
       }
-      currentWord->tail = list_new(word);
+      Node* new = (Node*)calloc(1, sizeof(Node));
+      node->next[8] = new;
+      new->word = word;
     }
-    node->totalWords++;
     node = trie->root;
   }
   current = trie->root;
@@ -78,20 +76,21 @@ void trie_read(Trie* trie_from_main, char* filename) {
 // associated with that key combination
 char* get_word(char* number) {
   if (number[0] == '#') {
-    wordsIndex++;
-    if (wordsIndex > current->totalWords) {
+    if (current->next[8] == NULL) {
       return "There are no more T9nonyms.\n";
     }
-    List* currentWord = current->words;
-    return list_get(currentWord, wordsIndex);
+    current = current->next[8];
+    return current->word;
   } else {
     current = trie->root;
-    wordsIndex = 0;
     int size = strlen(number);
     for (int i = 0; i < size - 1; i++) { 
     // the minus 1 is there to handle the extra newline that gets added in
       if (number[i] == '#') {
-        wordsIndex++;
+        current = current->next[8];
+        if (current == NULL && i < size - 1) {
+          break; // handles if they have a # in the middle of their number
+        }
       } else {
         int index = number[i] - '0' - 2; 
         if (current->next[index] == NULL) {
@@ -101,11 +100,10 @@ char* get_word(char* number) {
         }
       }
     }
-    if (wordsIndex > current->totalWords) {
+    if (current == NULL) {
       return "There are no more T9nonyms.\n";
     } else {
-      List* currentWord = current->words;
-      return list_get(currentWord, wordsIndex);
+      return current->word;
     }
   }
 }
@@ -118,6 +116,6 @@ void trie_free(Node* root) {
       trie_free(root->next[i]);
     }
   }
-  list_free(root->words);
+  free(root->word);
   free(root);
 }

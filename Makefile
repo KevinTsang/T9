@@ -1,7 +1,7 @@
 %.o: %.c
 	gcc -g -Wall -std=c11 -o $@ -c $<
 
-t9: t9.o trie.o list.o
+t9: t9.o trie.o
 	gcc -g -Wall -o t9 $^
 
 .PHONY: clean

@@ -3,7 +3,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "list.h"
 #include "trie.h"
 
 //

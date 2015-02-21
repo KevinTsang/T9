@@ -11,9 +11,8 @@
 
 // a single node that comprises part of the trie
 typedef struct Node {
-  List* words;
-  struct Node* next[8];
-  int totalWords;
+  char* word;
+  struct Node* next[9];
 } Node;
 
 // the actual trie structure itself
