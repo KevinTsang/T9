@@ -57,7 +57,7 @@ void trie_read(Trie* trie_from_main, char* filename) {
     }
     int size = strlen(buffer);
     char* word = (char*)calloc(size, sizeof(char));
-    strncpy(word, buffer, MAX_LINE_LENGTH);
+    strncpy(word, buffer, size);
     List* currentWord = node->words;
     if (currentWord == NULL) {
       node->words = list_new(word);
@@ -88,7 +88,8 @@ char* get_word(char* number) {
     current = trie->root;
     wordsIndex = 0;
     int size = strlen(number);
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size - 1; i++) { 
+    // the minus 1 is there to handle the extra newline that gets added in
       if (number[i] == '#') {
         wordsIndex++;
       } else {
